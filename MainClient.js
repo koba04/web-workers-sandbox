@@ -1,5 +1,5 @@
 export class MainClient {
-  constructor(scripts, apiResponse) {
+  constructor(scripts, apiResponse, settings) {
     this.workers = [];
     scripts.forEach(script => {
       const worker = new Worker(script);
@@ -9,6 +9,11 @@ export class MainClient {
           worker.postMessage({
             type: "api",
             payload: apiResponse,
+          })
+        } else if (e.data.type === "settings") {
+          worker.postMessage({
+            type: "settings",
+            payload: settings,
           })
         } else if (e.data.type === "setBackgroundColor") {
           document.getElementById("result").style.backgroundColor = e.data.payload;
@@ -21,6 +26,17 @@ export class MainClient {
         }
       })
     })
+  }
+  trigger(event, data) {
+    this.workers.map(worker => {
+      worker.postMessage({
+        type: 'event',
+        payload: {
+          event,
+          data
+        }
+      })
+    });
   }
   greet() {
     this.workers.forEach(worker => {

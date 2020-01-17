@@ -1,7 +1,13 @@
 class WorkerClient {
   constructor() {
+    this.listeners = new Map();
     self.addEventListener("message", e => {
-      if (e.data.type === "api") {
+      if (e.data.type === "event") {
+        const handlers = this.listeners.get(e.data.payload.event);
+        if (handlers) {
+          handlers.forEach(handler => handler(e.data.payload.data));
+        }
+      } else if (e.data.type === "api") {
         console.log(e.data.payload);
       } else if (e.data.type === "greet") {
         self.postMessage({
@@ -10,6 +16,11 @@ class WorkerClient {
         })
       }
     })
+  }
+  on(event, handler) {
+    const handlers = this.listeners.get(event) || [];
+    handlers.push(handler);
+    this.listeners.set(event, handlers);
   }
   async getData() {
     return new Promise(resolve => {
@@ -20,6 +31,18 @@ class WorkerClient {
       });
       self.postMessage({
         type: "api"
+      })
+    });
+  }
+  async getSettings() {
+    return new Promise(resolve => {
+      self.addEventListener("message", e => {
+        if (e.data.type === "settings") {
+          resolve(e.data.payload);
+        }
+      });
+      self.postMessage({
+        type: "settings"
       })
     });
   }

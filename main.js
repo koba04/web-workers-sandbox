@@ -1,8 +1,8 @@
 import { MainClient } from './MainClient.js';
-import { api } from "./api.js";
+import { api, getSettings } from "./api.js";
 
-api().then(res => {
-  const client = new MainClient(["./worker.js"], res);
+Promise.all([api(), getSettings()]).then(([res, settings]) => {
+  const client = new MainClient(["./worker.js"], res, settings);
 
   document.getElementById("main-button").addEventListener("click", () => {
     client.greet();
@@ -16,4 +16,6 @@ api().then(res => {
     ul.appendChild(li);
   });
   result.appendChild(ul);
+
+  client.trigger('show', res);
 });
