@@ -1,6 +1,30 @@
 export class MainClient {
   constructor(scripts, apiResponse, settings) {
     this.workers = [];
+    document.getElementById("form").addEventListener("submit", e => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+
+      const handler = e => {
+        if (e.data.type === "setSubmitError") {
+          console.log(e.data.payload);
+          document.getElementById("form-error").textContent = e.data.payload.errorMessage;
+        }
+      }
+
+      this.workers.forEach(worker => {
+        worker.addEventListener("message", handler);
+      });
+      this.trigger("submit", Array.from(formData.entries()).reduce((acc, [k, v]) => {
+        return {
+          ...acc,
+          [k]: v,
+        };
+      }, {}));
+      // TODO: wait all results and cancel the submit if there is any error
+
+      // TODO: all removeEventListeners
+    });
     scripts.forEach(script => {
       const worker = new Worker(script);
       this.workers.push(worker);

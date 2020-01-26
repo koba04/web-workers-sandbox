@@ -52,8 +52,6 @@ class WorkerClient {
         if (e.data.type === "setBackgroundColor") {
           if (e.data.result === "success") {
             resolve();
-          } else {
-            reject();
           }
         }
       });
@@ -62,5 +60,14 @@ class WorkerClient {
         payload: color,
       })
     });
+  }
+  async setSubmitError(data, errorMessage) {
+   self.postMessage({
+     type: "setSubmitError",
+     payload: {
+       data,
+       errorMessage
+     }
+   });
   }
 }
